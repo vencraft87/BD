@@ -50,7 +50,7 @@ arrayTablas colaPunteroTablas(arrayTablas arr_Tablas){
 bool arrayTablasVacia(arrayTablas arr_Tablas){
 	return arr_Tablas == NULL;
 }
-void agregaTabla(arrayTablas &arr_Tablas, Tabla &t){
+void agregaTabla(arrayTablas &arr_Tablas, Tabla t){
 	arrayTablas aux = new punteroTabla;
 	aux->tabla = t;
 	aux->sig = arr_Tablas;
@@ -88,11 +88,15 @@ bool existeTabla(arrayTablas arr_Tablas, char *nombreTabla){
 	}
 //	cout << "Fin de existeTabla \n";
 }
+arrayColumnas creaColumna(){
+	return NULL;
+}
+
 
 arrayTablas creaTabla(arrayTablas arr_Tablas, char *nombreTabla){
 //	cout << "En creaTabla\n";
 	if(existeTabla(arr_Tablas, nombreTabla)){
-//		cout << "Error ya existe tabla\n";
+		cout << "Error ya existe tabla\n";
 		return arr_Tablas;
 	}
 	else
@@ -100,14 +104,75 @@ arrayTablas creaTabla(arrayTablas arr_Tablas, char *nombreTabla){
 //		cout << "creaTabla: no existe tabla, la crea\n";
 		Tabla tab;
 		tab.nombre = nombreTabla;
+		tab.columnas = creaColumna();
 	    agregaTabla(arr_Tablas, tab);
 	    return arr_Tablas;
 	}
 //	cout << "Finaliza creaTtabla\n";
 }
-
+//ver que va a hacer
 bool tablaVacia(){
 }
+char * cabezaColumna(arrayColumnas arr_columnas){
+	return arr_columnas->nombre;
+}
+arrayColumnas colaColumna(arrayColumnas arr_columnas){
+	return arr_columnas->sig;
+}
+bool columnaVacia(arrayColumnas arr_columnas){
+	return arr_columnas == NULL;
+}
+arrayColumnas agregaColumna(arrayColumnas arr_columnas, char * nombreColumna){
+	arrayColumnas aux = new columna;
+	aux->nombre = nombreColumna;
+	aux->sig = arr_columnas;
+	arr_columnas = aux;
+	return arr_columnas;
+}
+void imprimirColumnas(arrayColumnas array_columnas){
+	if(array_columnas != NULL){
+		cout << cabezaColumna(array_columnas) << "\n";
+		imprimirColumnas(colaColumna(array_columnas));
+	}
+}
+	
+arrayColumnas agregaColumnaFinal(arrayColumnas arr_columnas, char * nombreColumna){
+	if(columnaVacia(arr_columnas)){
+		return agregaColumna(arr_columnas, nombreColumna);
+	}
+	else
+	{
+		return agregaColumna(agregaColumnaFinal(colaColumna(arr_columnas), nombreColumna), nombreColumna);
+	}
+} 
+
+//agrega columna desde array
+void addCol(arrayTablas arr_Tablas, char * nombreTabla, char * nombreColumna){
+	arrayTablas aux = new punteroTabla;
+	aux = arr_Tablas;
+	bool fin = false;
+	while(!fin){
+		if(aux != NULL){
+			if((strcmp(aux->tabla.nombre, nombreTabla) != 0)){
+				aux = aux->sig;
+			}
+			else
+			{
+				agregaColumnaFinal(aux->tabla.columnas, nombreColumna);
+				fin = true;			
+			}
+		}
+		else
+		{
+			fin = true;
+			cout << "No existe columna. \n";
+		}
+	}
+}
+
+
+
+
 
 void imprimeTablas(arrayTablas arr_Tablas){
 	if(arr_Tablas != NULL){
@@ -116,11 +181,11 @@ void imprimeTablas(arrayTablas arr_Tablas){
 	}
 }
 
-char * copiarChar(char *s){
-	char *copy = new char[(strlen(s)+1)];
-	return 	strcpy(copy,s); 
-}
 
+
+
+
+//Revisar esta función
 string get_str_between_two_str(const string &s, const string &start_delim, const string &stop_delim){
     unsigned first_delim_pos = s.find(start_delim);
     unsigned end_pos_of_first_delim = first_delim_pos + start_delim.length();
@@ -129,6 +194,11 @@ string get_str_between_two_str(const string &s, const string &start_delim, const
     return s.substr(end_pos_of_first_delim,last_delim_pos - end_pos_of_first_delim);
 }
 
+// Optimizar estas dos funciones!
+char * copiarChar(char *s){
+	char *copy = new char[(strlen(s)+1)];
+	return 	strcpy(copy,s); 
+}
 char * cambiaAChar(string s){
 	int n = s.length();
 	//char char_array[n+1];
@@ -141,7 +211,12 @@ int main(){
 	
 	arrayTablas at = creaPunteroTablas();
 
-	char buffer[20];
+	char * tabla1 = (char *) "tabla1";
+	at = creaTabla(at, tabla1);
+	imprimeTablas(at);
+	addCol(at, (char*) "tabla1", (char*) "CI");	
+
+
 	string comando;
 	string str;
 	string start;
@@ -162,7 +237,7 @@ int main(){
 		}else if (comando == "dropTable"){
 			cout << "Borrar tabla. \n";
 		}else if(comando == "addCol"){
-			cout << "Agregar columna. \n";			
+			cout << "Agregar columna. \n";		
 		}else if(comando == "dropCol"){
 			cout << "Borrar columna. \n";			
 		}else if(comando == "insertInto"){
